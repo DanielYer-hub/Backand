@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { DEFAULT_VALIDATION } = require("./mongooseValidators");
+const { DEFAULT_VALIDATION } = require("./mongoseValidations");
 
 const Address = new mongoose.Schema({
   region: {

@@ -4,13 +4,17 @@ const { handleError } = require("./utils/handleErrors");
 const connectToDB = require("./DB/dbService");
 const chalk = require('chalk');
 const corsMiddleware = require('./middleware/cors');
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 const PORT = 8181;
 
+
+
 app.use(corsMiddleware);
 app.use(express.static("./public"));
 app.use(express.json());
+app.use("/api/auth", authRoutes);
 
 app.use((req, res, next) => {
   console.log(
@@ -20,6 +24,8 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+
 
 app.use((err, req, res, next) => {
   console.log(err);
