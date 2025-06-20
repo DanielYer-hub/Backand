@@ -1,6 +1,5 @@
 const User = require("../users/mongodb/Users");
 const { generateUserPassword, comparePassword } = require("../users/helpers/bcrypt");
-// const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = "secret_warhammer_key";
