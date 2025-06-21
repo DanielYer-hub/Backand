@@ -5,6 +5,7 @@ const connectToDB = require("./DB/dbService");
 const chalk = require('chalk');
 const corsMiddleware = require('./middleware/cors');
 const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 const PORT = 8181;
@@ -15,6 +16,7 @@ app.use(corsMiddleware);
 app.use(express.static("./public"));
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 app.use((req, res, next) => {
   console.log(
