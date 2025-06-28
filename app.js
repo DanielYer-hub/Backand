@@ -18,7 +18,7 @@ app.use(express.static("./public"));
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/battle", battleRoutes);
+app.use("/api/battles", battleRoutes);
 
 app.use((req, res, next) => {
   console.log(

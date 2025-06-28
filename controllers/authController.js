@@ -14,7 +14,9 @@ function getRandomPlanets(pool, count = 3) {
 const register = async (req, res) => {
   try {
     const { name, email, password, phone, region } = req.body;
-    const planets = getRandomPlanets(PLANET_POOL);
+    const shuffled = [...PLANET_POOL].sort(() => 0.5 - Math.random());
+    const homeland = shuffled[0];
+    const planets = shuffled.slice(0, 3);
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ message: "Пользователь уже существует" });
 
@@ -28,6 +30,10 @@ const register = async (req, res) => {
       region,
       points: 1000,
       planets,
+      homeland,
+      spaceports: 0,
+      epicHeroes: 0,
+      isStatic: false
     });
 
     await user.save();
