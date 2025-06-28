@@ -27,9 +27,30 @@ const userSchema = new mongoose.Schema({
     default: 1000,
   },
   planets: {
-    type: [String], // Можем позже заменить на ObjectId если будут модели планет
+    type: [String], 
     default: [],
   },
+  lastAttackedAt: {
+  type: Date,
+  default: null,
+},
+spaceports: {
+  type: Number, 
+  default: 0
+},
+epicHeroes: {
+  type: Number, 
+  default: 0
+},
+isStatic: {
+  type: Boolean,
+  default: false 
+},
+homeland: {
+  type: String,
+  required: true 
+},
+
 }, { timestamps: true });
 
 const User = mongoose.model("user", userSchema);

@@ -1,14 +1,20 @@
 const User = require("../users/mongodb/Users");
 const { generateUserPassword, comparePassword } = require("../users/helpers/bcrypt");
 const jwt = require("jsonwebtoken");
+const PLANET_POOL = require("../models/planetList");
 
 const JWT_SECRET = "secret_warhammer_key";
+
+function getRandomPlanets(pool, count = 3) {
+  const shuffled = [...pool].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
 
 
 const register = async (req, res) => {
   try {
     const { name, email, password, phone, region } = req.body;
-
+    const planets = getRandomPlanets(PLANET_POOL);
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ message: "Пользователь уже существует" });
 
@@ -21,7 +27,7 @@ const register = async (req, res) => {
       phone,
       region,
       points: 1000,
-      planets: [], // потом добавим генерацию планет
+      planets,
     });
 
     await user.save();
