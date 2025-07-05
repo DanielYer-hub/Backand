@@ -5,7 +5,6 @@ const PLANET_POOL = [
     "Hive World",
     "Civilized World",
     "Colonial World",
-    "Colonial World",
     "World of Pleasure",
     "Craft World",
     "The World in the Eye of Horror"

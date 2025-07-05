@@ -50,6 +50,18 @@ homeland: {
   type: String,
   required: true 
 },
+blockedUntil: { /// Дата, до которой игрок заблокирован
+  type: Date,
+  default: null
+},
+defeatsOnHomeland: {
+  type: Number,
+  default: 0,
+},
+_lastHomelandDefeat: {
+  type: Date,
+  default: null
+},
 
 }, { timestamps: true });
 
