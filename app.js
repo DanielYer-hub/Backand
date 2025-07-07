@@ -7,11 +7,10 @@ const corsMiddleware = require('./middleware/cors');
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const battleRoutes = require("./routes/battleRoutes");
+const battleLogRoutes = require("./routes/battleLogRoutes");
 
 const app = express();
 const PORT = 8181;
-
-
 
 app.use(corsMiddleware);
 app.use(express.static("./public"));
@@ -19,6 +18,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/battles", battleRoutes);
+app.use("/api/battlelog", battleLogRoutes);
 
 app.use((req, res, next) => {
   console.log(
@@ -28,8 +28,6 @@ app.use((req, res, next) => {
   );
   next();
 });
-
-
 
 app.use((err, req, res, next) => {
   console.log(err);
