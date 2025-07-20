@@ -2,14 +2,13 @@ const User = require("../users/mongodb/Users");
 const { generateUserPassword, comparePassword } = require("../users/helpers/bcrypt");
 const jwt = require("jsonwebtoken");
 const PLANET_POOL = require("../models/planetList");
-
+require("dotenv").config();
 const JWT_SECRET = "secret_warhammer_key";
 
 function getRandomPlanets(pool, count = 3) {
   const shuffled = [...pool].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }
-
 
 const register = async (req, res) => {
   try {
@@ -18,7 +17,7 @@ const register = async (req, res) => {
     const homeland = shuffled[0];
     const planets = shuffled.slice(0, 3);
     const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ message: "Пользователь уже существует" });
+    if (existing) return res.status(400).json({ message: "User already exists" });
 
     const hash = generateUserPassword(password);
 
@@ -41,7 +40,7 @@ const register = async (req, res) => {
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
 
     res.status(201).json({
-      message: "Пользователь создан",
+      message: "User created",
       token,
       user: {
         id: user._id,
@@ -53,7 +52,7 @@ const register = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: "Ошибка регистрации", error: err.message });
+    res.status(500).json({ message: "Registration error", error: err.message });
   }
 };
 
@@ -62,10 +61,10 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Неверный логин или пароль" });
+    if (!user) return res.status(400).json({ message: "Incorrect login or password" });
 
     const match = comparePassword(password, user.password);
-    if (!match) return res.status(400).json({ message: "Неверный логин или пароль" });
+    if (!match) return res.status(400).json({ message: "Incorrect login or password" });
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
 
@@ -82,7 +81,7 @@ const login = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: "Ошибка входа", error: err.message });
+    res.status(500).json({ message: "Login error", error: err.message });
   }
 };
 

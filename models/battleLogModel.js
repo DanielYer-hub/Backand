@@ -1,4 +1,3 @@
-// models/battleLog.js
 const mongoose = require("mongoose");
 
 const battleLogSchema = new mongoose.Schema({
@@ -43,7 +42,11 @@ const battleLogSchema = new mongoose.Schema({
   },
   editableUntil: {
     type: Date,
-    default: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // +24 часа
+    default: () => new Date(Date.now() + 24 * 60 * 60 * 1000), 
+  },
+  isCanceled: {
+    type: Boolean,
+    default: false,
   },
 }, {
   timestamps: true,

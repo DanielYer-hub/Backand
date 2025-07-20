@@ -1,10 +1,9 @@
 const jwt = require("jsonwebtoken");
-
-const SECRET_KEY = "secret";
+require("dotenv").config();
+const SECRET_KEY = process.env.SECRET_KEY;
 
 // generate auth token
 const generateAuthToken = (user) => {
-  //create payload (ID, ISADMIN, ISBUSINESS)
   const payload = {
     _id: user._id,
     isAdmin: user.isAdmin,

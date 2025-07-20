@@ -7,4 +7,3 @@ const comparePassword = (password, cryptPassword) => {
 };
 
 module.exports = { generateUserPassword, comparePassword };
-// module.exports = bcrypt;

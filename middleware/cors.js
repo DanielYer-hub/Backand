@@ -8,7 +8,7 @@ const corsmiddleware = cors({
     "https://www.genericyourway.com" // твой продакшн-домен Важно: Убедись, что именно такой домен будет у твоего сайта на продакшене (https://www.genericyourway.com).
   ],
 
-  credentials: true, // если используешь cookies или токены
+  credentials: true, 
 });
 
 module.exports = corsmiddleware;

@@ -1,12 +1,12 @@
 const { createError, handleError } = require("../utils/handleErrors");
 const { verifyToken } = require("./providers/jwt");
-
-const TOKEN_GENERATOR = "jwt";
+require("dotenv").config();
+const TOKEN_GENERATOR = process.env.TOKEN_GENERATOR;
 
 const auth = (req, res, next) => {
   if (TOKEN_GENERATOR === "jwt") {
     try {
-      const tokenFromClient = req.header("x-auth-token"); // x-auth-token look maybe changed
+      const tokenFromClient = req.header("x-auth-token"); 
       if (!tokenFromClient) {
         return createError("Authentication", "Please login", 401);
       }

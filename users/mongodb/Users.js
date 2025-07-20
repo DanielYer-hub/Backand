@@ -50,7 +50,7 @@ homeland: {
   type: String,
   required: true 
 },
-blockedUntil: { /// Дата, до которой игрок заблокирован
+blockedUntil: { 
   type: Date,
   default: null
 },

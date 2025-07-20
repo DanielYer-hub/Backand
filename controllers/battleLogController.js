@@ -12,9 +12,9 @@ const createBattleLog = async (req, res) => {
       result,
     });
 
-    res.status(201).json({ message: "Бой записан", battle });
+    res.status(201).json({ message: "The fight is recorded", battle });
   } catch (err) {
-    res.status(500).json({ message: "Ошибка при записи боя", error: err.message });
+    res.status(500).json({ message: "Error while recording the fight", error: err.message });
   }
 };
 
@@ -23,7 +23,7 @@ const confirmBattle = async (req, res) => {
 
   try {
     const battle = await BattleLog.findById(battleId);
-    if (!battle) return res.status(404).json({ message: "Бой не найден" });
+    if (!battle) return res.status(404).json({ message: "Fight not found" });
 
     if (battle.attackerId.toString() === userId) {
   battle.confirmedByAttacker = true;
@@ -31,7 +31,7 @@ const confirmBattle = async (req, res) => {
   battle.confirmedByDefender = true;
   }
  else {
-      return res.status(403).json({ message: "Вы не участник этого боя" });
+      return res.status(403).json({ message: "You are not a participant in this fight." });
     }
 
     if (battle.confirmedByAttacker && battle.confirmedByDefender && !battle.pointsGiven) {
@@ -39,9 +39,9 @@ const confirmBattle = async (req, res) => {
     }
 
     await battle.save();
-    res.json({ message: "Бой подтверждён", battle });
+    res.json({ message: "Fight confirmed", battle });
   } catch (err) {
-    res.status(500).json({ message: "Ошибка при подтверждении", error: err.message });
+    res.status(500).json({ message: "Error during confirmation", error: err.message });
   }
 };
 
@@ -56,8 +56,6 @@ const applyBattleResults = async (battle) => {
   if (result === "win") {
     attacker.points += 200;
     defender.points += 100;
-
-    // Планета переходит
     defender.planets = defender.planets.filter(p => p && p.trim() !== planet);
     attacker.planets.push(planet);
   } else if (result === "draw") {
@@ -68,11 +66,37 @@ const applyBattleResults = async (battle) => {
     defender.points += 200;
   }
 
-  // Проставить флаг начисления
   battle.pointsGiven = true;
 
   await attacker.save();
   await defender.save();
 };
 
-module.exports = { createBattleLog, confirmBattle };
+const cancelBattle = async (req, res) => {
+  const { battleId, userId } = req.body;
+
+  try {
+    const battle = await BattleLog.findById(battleId);
+    if (!battle) return res.status(404).json({ message: "Fight not found" });
+    const isParticipant =
+      battle.attackerId.toString() === userId || battle.defenderId.toString() === userId;
+
+    if (!isParticipant) {
+      return res.status(403).json({ message: "You are not a participant in this battle." });
+    }
+    if (battle.confirmedByAttacker || battle.confirmedByDefender) {
+      return res.status(400).json({ message: "The fight is already confirmed. Cancellation is impossible." });
+    }
+    const defender = await User.findById(battle.defenderId);
+    if (defender) {
+      defender.lastAttackedAt = null;
+      await defender.save();
+    }
+    await battle.deleteOne();
+    return res.json({ message: "The fight is canceled." });
+  } catch (err) {
+    res.status(500).json({ message: "Error while canceling the fight", error: err.message });
+  }
+};
+
+module.exports = { createBattleLog, confirmBattle, cancelBattle, };
