@@ -8,9 +8,9 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const battleRoutes = require("./routes/battleRoutes");
 const battleLogRoutes = require("./routes/battleLogRoutes");
-
+require("dotenv").config();
 const app = express();
-const PORT = 8181;
+const PORT = process.env.PORT;
 
 app.use(corsMiddleware);
 app.use(express.static("./public"));

@@ -1,6 +1,6 @@
 const connectToLocalDB = require("./mongodb/connectToMongodbLocally");
 const connectToAtlasDB = require("./mongodb/connectToAtlas");
-
+require("dotenv").config();
 const ENVIROMENT = process.env.ENVIROMENT;
 const DB = process.env.DB;
 

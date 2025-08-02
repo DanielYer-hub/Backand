@@ -3,7 +3,7 @@ const { generateUserPassword, comparePassword } = require("../users/helpers/bcry
 const jwt = require("jsonwebtoken");
 const PLANET_POOL = require("../models/planetList");
 require("dotenv").config();
-const JWT_SECRET = "secret_warhammer_key";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function getRandomPlanets(pool, count = 3) {
   const shuffled = [...pool].sort(() => 0.5 - Math.random());
