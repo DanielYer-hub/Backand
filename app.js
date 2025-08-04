@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const battleRoutes = require("./routes/battleRoutes");
 const battleLogRoutes = require("./routes/battleLogRoutes");
+const morgan = require('morgan');
 require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT;

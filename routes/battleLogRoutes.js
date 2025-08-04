@@ -6,11 +6,12 @@ const {
   cancelBattle,
 } = require("../controllers/battleLogController");
 const { getBattleHistory } = require("../controllers/battleHistoryController");
+const authMiddleware = require("../middleware/authMiddleware");
 
-router.post("/create", createBattleLog);
-router.post("/confirm", confirmBattle);
-router.get("/history/:userId", getBattleHistory);
-router.post("/cancel", cancelBattle);
+router.post("/create", authMiddleware, createBattleLog);
+router.post("/confirm", authMiddleware, confirmBattle);
+router.get("/history/:userId", authMiddleware, getBattleHistory);
+router.post("/cancel", authMiddleware, cancelBattle);
 
 
 module.exports = router;
