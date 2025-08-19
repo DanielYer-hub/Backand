@@ -3,6 +3,7 @@ const Name = require("../../helpers/mongodb/Name");
 const { PHONE, EMAIL } = require("../../helpers/mongodb/mongoseValidations");
 const Image = require("../../helpers/mongodb/image");
 const Address = require("../../helpers/mongodb/Address");
+const Faction = require("../../helpers/mongodb/Faction");
 
 const userSchema = new mongoose.Schema({
   name: Name,
@@ -61,6 +62,11 @@ defeatsOnHomeland: {
 _lastHomelandDefeat: {
   type: Date,
   default: null
+},
+faction: Faction,
+rosterText: {
+  type: String,
+  default: ''
 },
 
 }, { timestamps: true });

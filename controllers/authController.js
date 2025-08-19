@@ -12,7 +12,7 @@ function getRandomPlanets(pool, count = 3) {
 
 const register = async (req, res) => {
   try {
-    const { name, email, password, phone, region } = req.body;
+    const { name, email, password, phone, region, faction } = req.body;
     const shuffled = [...PLANET_POOL].sort(() => 0.5 - Math.random());
     const homeland = shuffled[0];
     const planets = shuffled.slice(0, 3);
@@ -27,6 +27,7 @@ const register = async (req, res) => {
       password: hash,
       phone,
       region,
+      faction,
       points: 1000,
       planets,
       homeland,
@@ -49,6 +50,9 @@ const register = async (req, res) => {
         region: user.region,
         role: user.role,
         points: user.points,
+        planets: user.planets,  // Add planets to user object
+        homeland: user.homeland, // Add homeland to user object
+        faction: user.faction // Add faction to user object
       },
     });
   } catch (err) {
@@ -78,6 +82,9 @@ const login = async (req, res) => {
         region: user.region,
         role: user.role,
         points: user.points,
+        planets: user.planets,  // Add planets to user object
+        homeland: user.homeland, // Add homeland to user object
+        faction: user.faction // Add faction to user object
       },
     });
   } catch (err) {

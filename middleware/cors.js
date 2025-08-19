@@ -2,6 +2,7 @@ const cors = require("cors");
 
 const corsmiddleware = cors({
   origin: [
+    "http://localhost:5173",        // для Vite-приложения
     "http://localhost:3000",        // для React-приложения
     "http://127.0.0.1:5500",        // если тестируешь HTML вручную
     "http://localhost:5500",
