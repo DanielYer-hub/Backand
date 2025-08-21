@@ -34,6 +34,18 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const updateMe = async (req, res) => {
+  try {
+    const allowed = ["factionText"]; // сейчас редактируем только заметку
+    const patch = {};
+    for (const k of allowed) if (k in req.body) patch[k] = req.body[k];
 
+    const user = await User.findByIdAndUpdate(req.user.id, patch, { new: true }).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ user });
+  } catch (e) {
+    res.status(500).json({ message: "Failed to update profile", error: e.message });
+  }
+};
 
-module.exports = { getUserInfo, getAllUsers, deleteUser };
+module.exports = { getUserInfo, getAllUsers, deleteUser, updateMe };

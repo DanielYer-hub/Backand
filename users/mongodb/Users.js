@@ -68,6 +68,10 @@ rosterText: {
   type: String,
   default: ''
 },
+factionText: { 
+  type: String, 
+  default: "" 
+},
 
 }, { timestamps: true });
 

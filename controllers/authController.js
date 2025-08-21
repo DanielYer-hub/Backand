@@ -12,7 +12,7 @@ function getRandomPlanets(pool, count = 3) {
 
 const register = async (req, res) => {
   try {
-    const { name, email, password, phone, region, faction } = req.body;
+    const { name, email, password, phone, region, faction, address } = req.body;
     const shuffled = [...PLANET_POOL].sort(() => 0.5 - Math.random());
     const homeland = shuffled[0];
     const planets = shuffled.slice(0, 3);
@@ -22,18 +22,19 @@ const register = async (req, res) => {
     const hash = generateUserPassword(password);
 
     const user = new User({
-      name,
-      email,
-      password: hash,
-      phone,
-      region,
-      faction,
-      points: 1000,
-      planets,
-      homeland,
-      spaceports: 0,
-      epicHeroes: 0,
-      isStatic: false
+  name,
+  email,
+  password: hash,
+  phone,
+  region,
+  address: address || undefined,   // 👈 чтобы пришёл city
+  faction,                         // 👈 строка из enum
+  points: 1000,
+  planets,
+  homeland,
+  spaceports: 0,
+  epicHeroes: 0,
+  isStatic: false
     });
 
     await user.save();
@@ -48,6 +49,7 @@ const register = async (req, res) => {
         name: user.name,
         email: user.email,
         region: user.region,
+        address: user.address, // Add address to user object
         role: user.role,
         points: user.points,
         planets: user.planets,  // Add planets to user object
