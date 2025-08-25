@@ -21,21 +21,21 @@ const register = async (req, res) => {
 
     const hash = generateUserPassword(password);
 
-    const user = new User({
+  const user = new User({
   name,
   email,
   password: hash,
   phone,
   region,
-  address: address || undefined,   // 👈 чтобы пришёл city
-  faction,                         // 👈 строка из enum
+  address: address || undefined,  
+  faction,                         
   points: 1000,
   planets,
   homeland,
   spaceports: 0,
   epicHeroes: 0,
   isStatic: false
-    });
+  });
 
     await user.save();
 

@@ -4,6 +4,7 @@ const { PHONE, EMAIL } = require("../../helpers/mongodb/mongoseValidations");
 const Image = require("../../helpers/mongodb/image");
 const Address = require("../../helpers/mongodb/Address");
 const Faction = require("../../helpers/mongodb/Faction");
+const Region = require("../../helpers/mongodb/Region");
 
 const userSchema = new mongoose.Schema({
   name: Name,
@@ -17,6 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   image: Image,
   address: Address,
+  region: Region,
   role: { type: String, enum: ['player', 'admin'], default: 'player' },
   region: {
     type: String,
