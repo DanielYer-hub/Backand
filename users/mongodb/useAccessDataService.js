@@ -3,7 +3,7 @@ const { createError } = require("../../utils/handleErrors");
 const { generateUserPassword, comparePassword } = require("../helpers/bcrypt");
 const User = require("./mongodb/User");
 
-// Register new user
+
 const registerUser = async (newUser) => {
   try {
     newUser.password = generateUserPassword(newUser.password);
@@ -15,7 +15,7 @@ const registerUser = async (newUser) => {
   }
 };
 
-// get user
+
 const getUser = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -25,7 +25,7 @@ const getUser = async (userId) => {
   }
 };
 
-// get all users
+
 const getAllUsers = async () => {
   try {
     const users = await User.find();
@@ -35,7 +35,7 @@ const getAllUsers = async () => {
   }
 };
 
-// login user
+
 const loginUser = async (email, password) => {
   try {
     const userFromDB = await User.findOne({ email });
@@ -69,7 +69,7 @@ const updateUser = async (id, updatedUser) => {
   }
 };
 
-// delete user
+
 const deleteUser = async (id) => {
   let user = await User.findById(id);
 

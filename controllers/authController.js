@@ -49,12 +49,12 @@ const register = async (req, res) => {
         name: user.name,
         email: user.email,
         region: user.region,
-        address: user.address, // Add address to user object
+        address: user.address, 
         role: user.role,
         points: user.points,
-        planets: user.planets,  // Add planets to user object
-        homeland: user.homeland, // Add homeland to user object
-        faction: user.faction // Add faction to user object
+        planets: user.planets,  
+        homeland: user.homeland, 
+        faction: user.faction 
       },
     });
   } catch (err) {
@@ -84,9 +84,9 @@ const login = async (req, res) => {
         region: user.region,
         role: user.role,
         points: user.points,
-        planets: user.planets,  // Add planets to user object
-        homeland: user.homeland, // Add homeland to user object
-        faction: user.faction // Add faction to user object
+        planets: user.planets,  
+        homeland: user.homeland, 
+        faction: user.faction 
       },
     });
   } catch (err) {

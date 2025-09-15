@@ -72,7 +72,6 @@ const confirmBattle = async (req, res) => {
 const applyBattleResults = async (battle) => {
   const attacker = await User.findById(battle.attackerId);
   const defender = await User.findById(battle.defenderId);
-
   const planet = (battle.planets || "").trim();
   const result = battle.result;
 

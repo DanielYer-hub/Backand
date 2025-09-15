@@ -16,7 +16,6 @@ const getAllUsers = async (req, res) => {
   try {
     const me = req.user?.id;
     const { region, country, city } = req.query;
-
     const criteria = {};
     if (region) criteria.region = region;
     if (country) criteria["address.country"] = country;
@@ -45,7 +44,7 @@ const deleteUser = async (req, res) => {
 
 const updateMe = async (req, res) => {
   try {
-    const allowed = ["factionText"]; // сейчас редактируем только заметку
+    const allowed = ["factionText"]; 
     const patch = {};
     for (const k of allowed) if (k in req.body) patch[k] = req.body[k];
 

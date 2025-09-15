@@ -15,7 +15,7 @@ const {
 
 const router = express.Router();
 
-// Create new user
+
 router.post("/", async (req, res) => {
   try {
     let newUser = req.body;
@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get user by id
+
 router.get("/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -53,7 +53,7 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
-// Get all users
+
 router.get("/", auth, async (req, res) => {
   let userInfo = req.user;
 
@@ -72,7 +72,7 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-// login user
+
 router.post("/login", async (req, res) => {
   try {
     let { email, password } = req.body;
@@ -90,7 +90,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// update user
+
 router.put("/:id", auth, async (req, res) => {
   let userInfo = req.user;
   let updatedUser = req.body;
@@ -117,7 +117,7 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
-// delete user
+
 router.delete("/:id", auth, async (req, res) => {
   const { id } = req.params;
   let userInfo = req.user;

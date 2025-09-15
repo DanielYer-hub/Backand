@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
-// generate auth token
+
 const generateAuthToken = (user) => {
   const payload = {
     _id: user._id,
@@ -14,7 +14,7 @@ const generateAuthToken = (user) => {
   return token;
 };
 
-// VERIFY TOKEN
+
 const verifyToken = (tokenFromClient) => {
   try {
     const payload = jwt.verify(tokenFromClient, SECRET_KEY);

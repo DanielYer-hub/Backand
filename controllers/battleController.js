@@ -11,7 +11,6 @@ const resolveBattle = async (req, res) => {
       return res.status(404).json({ message: "Player not found" });
     }
 
-    // Check: has the defender been recently attacked (7 days)
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     if (defender.lastAttackedAt && defender.lastAttackedAt > oneWeekAgo) {
@@ -20,37 +19,30 @@ const resolveBattle = async (req, res) => {
       });
     }
 
-    // Verification of the planet's name correctness
+    
     const cleanPlanet = planetName?.trim();
     if (!cleanPlanet) {
       return res.status(400).json({ message: "The name of the planet is not provided or is empty." });
     }
-
-    // The main logic of the battle
     if (result === "win") {
       attacker.points += 200;
       defender.points += 100;
-
-      // Removal of the planet by the defender
       defender.planets = defender.planets.filter(p => p && p.trim() !== cleanPlanet);
-
       if (!attacker.isStatic) {
         attacker.planets.push(cleanPlanet);
       }
 
-      // Check: the player became an NPC (only homeland remained and lost the battle)
+      
       const isDefenderOnHomeland = cleanPlanet === defender.homeland;
       const onlyHomelandLeft = defender.planets.length === 1 && defender.planets[0] === defender.homeland;
 
       if (isDefenderOnHomeland && onlyHomelandLeft) {
         if (defender.defeatsOnHomeland === 1 && defender._lastHomelandDefeat && defender.updatedAt < defender._lastHomelandDefeat) {
-          //Second defeat in a row — turning into an NPC
           defender.isStatic = true;
           defender.spaceports = Math.min(defender.spaceports, 1);
           defender.epicHeroes = Math.min(defender.epicHeroes, 1);
           defender.defeatsOnHomeland = 2;
         } else {
-          // First defeat on Homeland
           defender.defeatsOnHomeland = 1;
           defender._lastHomelandDefeat = now;
         }
@@ -58,20 +50,18 @@ const resolveBattle = async (req, res) => {
     } else if (result === "draw") {
       attacker.points += 150;
       defender.points += 150;
-
       defender.defeatsOnHomeland = 0;
       defender._lastHomelandDefeat = null;
     } else if (result === "lose") {
       attacker.points += 100;
       defender.points += 200;
-
       defender.defeatsOnHomeland = 0;
       defender._lastHomelandDefeat = null;
     } else {
       return res.status(400).json({ message: "Incorrect result: win / draw / lose" });
     }
 
-    // Space ports and epic heroes
+    
     const checkAndApplySpaceport = (player) => {
       if (player.points >= 2000 && player.spaceports < 2) {
         player.spaceports = 2;
