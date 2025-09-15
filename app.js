@@ -14,8 +14,8 @@ const app = express();
 const PORT = process.env.PORT;
 
 app.use(corsMiddleware);
-app.options('*', corsMiddleware); // 👈 ответ на OPTIONS для всех путей
-app.use(morgan('dev')); // логирование запросов в консоль
+app.options('*', corsMiddleware); 
+app.use(morgan('dev')); 
 app.use(express.static("./public"));
 app.use(express.json());
 app.use("/api/auth", authRoutes);

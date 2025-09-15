@@ -14,7 +14,16 @@ const getUserInfo = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password"); 
+    const me = req.user?.id;
+    const { region, country, city } = req.query;
+
+    const criteria = {};
+    if (region) criteria.region = region;
+    if (country) criteria["address.country"] = country;
+    if (city) criteria["address.city"] = city;
+    if (me) criteria._id = { $ne: me }; 
+
+    const users = await User.find(criteria).select("-password"); 
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: "Error retrieving users", error: err.message });
