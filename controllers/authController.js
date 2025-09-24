@@ -54,7 +54,8 @@ const register = async (req, res) => {
         points: user.points,
         planets: user.planets,  
         homeland: user.homeland, 
-        faction: user.faction 
+        faction: user.faction, 
+        factionText: user.factionText,
       },
     });
   } catch (err) {
@@ -86,7 +87,8 @@ const login = async (req, res) => {
         points: user.points,
         planets: user.planets,  
         homeland: user.homeland, 
-        faction: user.faction 
+        faction: user.faction,
+        factionText: user.factionText, 
       },
     });
   } catch (err) {
