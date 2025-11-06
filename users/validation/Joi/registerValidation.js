@@ -1,6 +1,29 @@
 const Joi = require("joi");
 
 const registerValidation = (user) => {
+
+const e164 = /^\+?[1-9]\d{6,14}$/;
+const tgUser = /^[a-zA-Z0-9_]{5,32}$/;
+
+  const contacts = Joi.object({
+    phoneE164: Joi.string().pattern(e164).allow("", null),
+    telegramUsername: Joi.string()
+      .custom((val, helpers) => {
+        if (!val) return val;
+        const cleaned = String(val).replace(/^@/, "");
+        if (!tgUser.test(cleaned)) return helpers.error("any.invalid");
+        return cleaned; 
+      })
+      .allow("", null),
+  }).custom((v, helpers) => {
+    const hasWA = !!v?.phoneE164;
+    const hasTG = !!v?.telegramUsername;
+    if (!hasWA && !hasTG) {
+      return helpers.message("Provide WhatsApp phone or Telegram username");
+    }
+    return v;
+  });
+
   const schema = Joi.object({
     name: Joi.object()
       .keys({
@@ -8,11 +31,6 @@ const registerValidation = (user) => {
         middle: Joi.string().max(256).allow(""),
         last: Joi.string().min(2).max(256).required(),
       })
-      .required(),
-
-    phone: Joi.string()
-      .ruleset.regex(/0[0-9]{1,2}\-?\s?[0-9]{3}\s?[0-9]{4}/)
-      .rule({ message: "Phone must be a valid Israli phone number" })
       .required(),
 
     email: Joi.string()
@@ -40,7 +58,6 @@ const registerValidation = (user) => {
           )
           .rule({ message: "Image must contain valid URL" })
           .allow(""),
-        alt: Joi.string().max(256).allow(""),
       })
       .required(),
 
@@ -48,9 +65,26 @@ const registerValidation = (user) => {
       .keys({
         country: Joi.string().required(),
         city: Joi.string().required(),
-        street: Joi.string().required(),
       })
       .required(),
+
+       region: Joi.string()
+      .valid(
+        "North America",
+        "Caribbean",
+        "Central America",
+        "South America",
+        "Africa",
+        "Middle East",
+        "Europe",
+        "Asia",
+        "Australia and Oceania"
+      )
+      .required(),
+
+    settings: Joi.array().items(Joi.string()).min(1).required(),
+    
+   contacts: contacts.required(),
 
     isPlayer: Joi.boolean().required(),
     isAdmin: Joi.boolean().allow(""),

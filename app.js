@@ -8,11 +8,17 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const battleRoutes = require("./routes/battleRoutes");
 const battleLogRoutes = require("./routes/battleLogRoutes");
+const publicRoutes = require("./routes/publicRoutes");
+const inviteRoutes = require("./routes/inviteRoutes");
 const morgan = require('morgan');
 require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT;
+const CAMPAIGN_ENABLED = process.env.CAMPAIGN_ENABLED === "false";
+const path = require('path');
 
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(corsMiddleware);
 app.options('*', corsMiddleware); 
 app.use(morgan('dev')); 
@@ -20,8 +26,13 @@ app.use(express.static("./public"));
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/public", publicRoutes);
+app.use("/api/invites", inviteRoutes);
+app.use("/api/availability", require("./routes/availabilityRoutes"));
+if (!CAMPAIGN_ENABLED){
 app.use("/api/battles", battleRoutes);
 app.use("/api/battlelog", battleLogRoutes);
+}
 
 app.use((req, res, next) => {
   console.log(

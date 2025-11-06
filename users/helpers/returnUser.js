@@ -6,8 +6,7 @@ const returnUser = (user) => {
     },
     email: user.email,
     image: {
-      url: user.image.url,
-      alt: user.image.alt,
+      url: user.image?.url || "",
     },
   };
 };

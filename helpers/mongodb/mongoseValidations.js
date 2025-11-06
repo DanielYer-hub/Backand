@@ -4,13 +4,6 @@ const DEFAULT_VALIDATION = {
   minLength: 2,
   maxLength: 256,
   trim: true,
-  lowercase: true,
-};
-
-const PHONE = {
-  type: String,
-  required: true,
-  match: RegExp(/0[0-9]{1,2}\-?\s?[0-9]{3}\s?[0-9]{4}/),
 };
 
 const EMAIL = {
@@ -26,9 +19,10 @@ const URL = {
   type: String,
   trim: true,
   lowercase: true,
-  match: RegExp(
-    /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/
-  ),
+ match: [
+    /^(?:\/uploads\/[\w.\-]+|https?:\/\/(?:localhost|127\.0\.0\.1|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(?::\d+)?\/\S*)$/,
+    "Invalid URL",
+  ],
 };
 
-module.exports = { DEFAULT_VALIDATION, PHONE, EMAIL, URL };
+module.exports = { DEFAULT_VALIDATION,  EMAIL, URL };

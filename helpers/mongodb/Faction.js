@@ -31,5 +31,5 @@ module.exports = {
     'Leagues of Votann'
   ],
   default: 'Space Marines',
-  required: true
+  required: false
 };

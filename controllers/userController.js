@@ -1,4 +1,5 @@
 const User = require("../users/mongodb/Users");
+const path = require('path');
 
 const getUserInfo = async (req, res) => {
   try {
@@ -42,18 +43,82 @@ const deleteUser = async (req, res) => {
   }
 };
 
+function pickPatch(allowed, body) {
+  const out = {};
+  for (const path of allowed) {
+    const keys = path.split(".");
+    let src = body, ok = true;
+    for (const k of keys) {
+      if (src && Object.prototype.hasOwnProperty.call(src, k)) {
+        src = src[k];
+      } else {
+        ok = false;
+        break;
+      }
+    }
+    if (!ok) continue;
+    let cursor = out;
+    keys.forEach((k, i) => {
+      if (i === keys.length - 1) {
+        cursor[k] = src;
+      } else {
+        cursor[k] = cursor[k] || {};
+        cursor = cursor[k];
+      }
+    });
+  }
+  return out;
+}
+
 const updateMe = async (req, res) => {
   try {
-    const allowed = ["factionText"]; 
-    const patch = {};
-    for (const k of allowed) if (k in req.body) patch[k] = req.body[k];
-
-    const user = await User.findByIdAndUpdate(req.user.id, patch, { new: true }).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json({ user });
+    const allowed = ["name.first", "name.last",
+      "email",
+      "region",
+      "address.country", "address.city",
+      "settings",
+      "contacts.phoneE164", "contacts.telegramUsername",
+      "bio",]; 
+    const patch = pickPatch(allowed, req.body);
+    if (patch.contacts) {
+      if (typeof patch.contacts.telegramUsername === "string") {
+        patch.contacts.telegramUsername = patch.contacts.telegramUsername.replace(/^@/, "");
+      }
+      if (typeof patch.contacts.phoneE164 === "string") {
+        let p = patch.contacts.phoneE164.trim();
+        p = p.replace(/(?!^\+)\D/g, "");
+        if (!p.startsWith("+")) p = "+" + p.replace(/\D/g, "");
+        patch.contacts.phoneE164 = p;
+      }
+    }
+    const updated = await User.findByIdAndUpdate(
+      req.user.id,
+      patch,
+      { new: true, runValidators: true, context: "query" }
+    ).select("-password");
+    if (!updated) return res.status(404).json({ message: "User not found" });
+    res.json({ user: updated });
   } catch (e) {
     res.status(500).json({ message: "Failed to update profile", error: e.message });
   }
 };
 
-module.exports = { getUserInfo, getAllUsers, deleteUser, updateMe };
+const uploadMyPhoto = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    const publicUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { image: { url: publicUrl } },
+      { new: true, runValidators: true, context: "query" }
+    ).select("-password");
+
+    return res.json({ url: publicUrl, user });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Upload failed", error: e.message });
+  }
+};
+
+module.exports = { getUserInfo, getAllUsers, deleteUser, updateMe, uploadMyPhoto };

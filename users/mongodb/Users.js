@@ -1,14 +1,13 @@
 const mongoose = require("mongoose");
 const Name = require("../../helpers/mongodb/Name");
-const { PHONE, EMAIL } = require("../../helpers/mongodb/mongoseValidations");
+const { EMAIL } = require("../../helpers/mongodb/mongoseValidations");
 const Image = require("../../helpers/mongodb/image");
 const Address = require("../../helpers/mongodb/Address");
-const Faction = require("../../helpers/mongodb/Faction");
 const Region = require("../../helpers/mongodb/Region");
+const { Availability } = require("../../helpers/mongodb/Availability");
 
 const userSchema = new mongoose.Schema({
   name: Name,
-  phone: PHONE,
   email: EMAIL,
   password: {
     type: String,
@@ -16,64 +15,22 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  bio: { type: String, default: "" },
   image: Image,
   address: Address,
   region: Region,
   role: { type: String, enum: ['player', 'admin'], default: 'player' },
-  region: {
-    type: String,
-    required: true,
-    trim: true,
+ 
+settings: {
+    type: [String],
+    default: [],    
   },
-  points: {
-    type: Number,
-    default: 1000,
+contacts: {
+    phoneE164: { type: String, default: "" },              
+    telegramUsername: { type: String, default: "" }         
   },
-  planets: {
-    type: [String], 
-    default: [],
-  },
-  lastAttackedAt: {
-  type: Date,
-  default: null,
-},
-spaceports: {
-  type: Number, 
-  default: 0
-},
-epicHeroes: {
-  type: Number, 
-  default: 0
-},
-isStatic: {
-  type: Boolean,
-  default: false 
-},
-homeland: {
-  type: String,
-  required: true 
-},
-blockedUntil: { 
-  type: Date,
-  default: null
-},
-defeatsOnHomeland: {
-  type: Number,
-  default: 0,
-},
-_lastHomelandDefeat: {
-  type: Date,
-  default: null
-},
-faction: Faction,
-rosterText: {
-  type: String,
-  default: ''
-},
-factionText: { 
-  type: String, 
-  default: "" 
-},
+
+availability: { type: Availability, default: () => ({}) },
 
 }, { timestamps: true });
 
