@@ -7,8 +7,7 @@ const DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 exports.createInvite = async (req, res) => {
   try {
     const fromUser = req.user?.id;
-    const { targetUserId, message, slot } = req.body;
-
+    const { targetUserId, message, slot, setting } = req.body;
     if (!fromUser) return res.status(401).json({ message: "Not authenticated" });
     if (!targetUserId) return res.status(400).json({ message: "targetUserId is required" });
     if (!slot || typeof slot.day !== "number" || slot.day < 0 || slot.day > 6) {
@@ -17,33 +16,35 @@ exports.createInvite = async (req, res) => {
     if (String(fromUser) === String(targetUserId)) {
       return res.status(400).json({ message: "You cannot invite yourself" });
     }
-    const target = await User.findById(targetUserId).select("availability");
+    const target = await User.findById(targetUserId).select("availability settings");
     if (!target) return res.status(404).json({ message: "Target not found" });
     const av = target.availability || { busyAllWeek:false, days:[] };
     if (av.busyAllWeek) return res.status(400).json({ message: "Target is busy all week" });
     const dayCfg = (av.days || []).find(d => d.day === slot.day);
     if (!dayCfg) return res.status(400).json({ message: "Day is not available" });
-
+    if (setting && !(target.settings || []).includes(setting)) {
+      return res.status(400).json({ message: "Target does not play this setting" });
+    }
     const conflict = await Invite.findOne({
       toUser: targetUserId,
       "slot.day": slot.day,
       status: { $in: ["pending", "accepted"] }
     });
     if (conflict) return res.status(409).json({ message: "Day already booked" });
-
     const invite = await Invite.create({
       fromUser,
       toUser: targetUserId,
       message: message || "",
-      slot: { day: slot.day, from: slot.from || null, to: slot.to || null }
+      slot: { day: slot.day, from: slot.from || null, to: slot.to || null },
+      setting: setting || null
     });
-
     res.status(201).json({ invite });
   } catch (e) {
     console.error("createInvite error:", e);
     res.status(500).json({ message: "Failed to create invite" });
   }
 };
+
 
 exports.incomingInvites = async (req, res) => {
   try {
@@ -133,22 +134,17 @@ exports.acceptInvite = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
-
     const inv = await Invite.findById(id)
       .populate("fromUser", "name contacts")
       .populate("toUser", "name contacts");
-
     if (!inv) return res.status(404).json({ message: "Invite not found" });
     if (String(inv.toUser._id) !== String(userId))
       return res.status(403).json({ message: "Not your invite" });
     if (inv.status !== "pending")
       return res.status(400).json({ message: "Invite already resolved" });
-
     inv.status = "accepted";
     await inv.save();
-
     const links = buildContactLinks(inv.fromUser); 
-
     res.json({
       message: "Accepted",
       inviteId: inv._id,
