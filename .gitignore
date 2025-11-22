@@ -2,4 +2,4 @@
 .env.local
 logs/
 node-modules/
-uploads/
+uploads/ 
