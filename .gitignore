@@ -1,4 +1,4 @@
-*.env
+.env
 logs/
 node-modules/
 uploads/
