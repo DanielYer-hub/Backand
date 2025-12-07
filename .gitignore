@@ -1,5 +1,8 @@
 *.env
 .env.local
+.env.production
+.env.production
 logs/
-node-modules/
+
+node_modules/
 uploads/ 
