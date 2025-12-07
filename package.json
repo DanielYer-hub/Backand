@@ -2,9 +2,12 @@
   "name": "backand",
   "version": "1.0.0",
   "main": "app.js",
+  
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "fix-old-users": "node scripts/fixOldUsers.js"
+    "fix-old-users": "node scripts/fixOldUsers.js",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "keywords": [],
   "author": "",
