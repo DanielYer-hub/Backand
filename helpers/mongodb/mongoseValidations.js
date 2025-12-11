@@ -19,7 +19,7 @@ const URL = {
   type: String,
   trim: true,
   lowercase: true,
- match: [
+  match: [
     /^(?:\/uploads\/[\w.\-]+|https?:\/\/(?:localhost|127\.0\.0\.1|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(?::\d+)?\/\S*)$/,
     "Invalid URL",
   ],
