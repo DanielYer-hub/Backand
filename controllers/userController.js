@@ -106,14 +106,6 @@ const updateMe = async (req, res) => {
 
 const uploadMyPhoto = async (req, res) => {
   try {
-     console.log("=== CLOUDINARY ENV CHECK ===");
-    console.log("CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
-    console.log("CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY);
-    console.log(
-      "CLOUDINARY_API_SECRET exists:",
-      !!process.env.CLOUDINARY_API_SECRET
-    );
-    console.log("============================");
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
     const userId = req.user?.id || req.user?._id; 
     const result = await new Promise((resolve, reject) => {
