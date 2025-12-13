@@ -1,6 +1,6 @@
 const User = require("../users/mongodb/Users");
 const path = require('path');
-const { cloudinary } = require("../../helpers/mongodb/cloudinary");
+const { cloudinary } = require("../helpers/mongodb/cloudinary");
 
 const getUserInfo = async (req, res) => {
   try {
