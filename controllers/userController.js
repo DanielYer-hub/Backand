@@ -1,5 +1,6 @@
 const User = require("../users/mongodb/Users");
 const path = require('path');
+const { cloudinary } = require("../helpers/cloudinary");
 
 const getUserInfo = async (req, res) => {
   try {
@@ -106,18 +107,29 @@ const updateMe = async (req, res) => {
 const uploadMyPhoto = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-    const publicUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-
+    const userId = req.user?.id || req.user?._id; 
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: "gyw/avatars",
+          resource_type: "image",
+        },
+        (err, uploadResult) => {
+          if (err) return reject(err);
+          resolve(uploadResult);
+        }
+      );
+      stream.end(req.file.buffer);
+    });
     const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { image: { url: publicUrl } },
-      { new: true, runValidators: true, context: "query" }
-    ).select("-password");
-
-    return res.json({ url: publicUrl, user });
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ message: "Upload failed", error: e.message });
+      userId,
+      { image: { url: result.secure_url } },
+      { new: true }
+    );
+    return res.json({ user });
+  } catch (err) {
+    console.error("uploadMyPhoto error:", err);
+    return res.status(500).json({ message: "Upload failed", error: err.message });
   }
 };
 
