@@ -26,9 +26,13 @@ exports.createInvite = async (req, res) => {
       return res.status(400).json({ message: "Target does not play this setting" });
     }
     const conflict = await Invite.findOne({
-      toUser: targetUserId,
-      "slot.day": slot.day,
-      status: { $in: ["pending", "accepted"] }
+    "slot.day": slot.day,
+    $or: [
+    { toUser: targetUserId, status: "pending" },
+    { fromUser: targetUserId, status: "pending" },
+    { toUser: targetUserId, status: "accepted", closedByTo: { $ne: true } },
+    { fromUser: targetUserId, status: "accepted", closedByFrom: { $ne: true } },
+    ],
     });
     if (conflict) return res.status(409).json({ message: "Day already booked" });
     const invite = await Invite.create({
@@ -49,66 +53,100 @@ exports.createInvite = async (req, res) => {
 exports.incomingInvites = async (req, res) => {
   try {
     const userId = req.user.id;
-    const list = await Invite.find({ toUser: userId, status: "pending" })
-      .populate("fromUser", "name email region address.city contacts") 
+
+    const list = await Invite.find({
+      toUser: userId,
+      $or: [
+        { status: "pending" },
+        { status: "accepted", closedByTo: { $ne: true } },
+      ],
+    })
+      .populate("fromUser", "name email region address.city contacts")
       .lean();
 
-  const invites = list.map(inv => {
-  const dayName = inv.slot?.day !== undefined ? DAY_NAMES[inv.slot.day] : null;
-  const from = inv.slot?.from || "";
-  const to = inv.slot?.to || "";
-  const timeRange = from && to ? `${from}–${to}` : from ? from : "";
-  return {
-    _id: inv._id,
-    setting: inv.setting,
-    fromUser: inv.fromUser,
-    toUser: inv.toUser,
-    createdAt: inv.createdAt,
-    slot: inv.slot,
-    slotReadable: dayName ? `${dayName}${timeRange ? ` (${timeRange})` : ""}` : null,
-    opponentContact: buildSingleContact(inv.fromUser),
-  };
-});
+    const invites = list.map((inv) => {
+      const dayName =
+        inv.slot?.day !== undefined ? DAY_NAMES[inv.slot.day] : null;
+
+      const from = inv.slot?.from || "";
+      const to = inv.slot?.to || "";
+      const timeRange = from && to ? `${from}–${to}` : from ? from : "";
+
+      return {
+        _id: inv._id,
+        status: inv.status,
+        setting: inv.setting,
+        message: inv.message || "",
+        fromUser: inv.fromUser,
+        toUser: inv.toUser,
+        createdAt: inv.createdAt,
+        slot: inv.slot,
+        slotReadable: dayName
+          ? `${dayName}${timeRange ? ` (${timeRange})` : ""}`
+          : null,
+        opponentContacts: buildContactLinks(inv.fromUser || {}),
+        opponentContact: buildSingleContact(inv.fromUser || {}),
+      };
+    });
 
     res.set("Cache-Control", "no-store");
     res.json({ invites });
   } catch (e) {
     console.error("incomingInvites error:", e);
-    res.status(500).json({ message: "Failed to load incoming" });
+    res.status(500).json({ message: "Failed to load incoming", error: e?.message });
   }
 };
+
+
 
 exports.outgoingInvites = async (req, res) => {
   try {
     const userId = req.user.id;
-    const list = await Invite.find({ fromUser: userId, status: "pending" })
+
+    const list = await Invite.find({
+      fromUser: userId,
+      $or: [
+        { status: "pending" },
+        { status: "accepted", closedByFrom: { $ne: true } },
+      ],
+    })
       .populate("toUser", "name email region address.city contacts")
       .lean();
 
-  const invites = list.map(inv => {
-  const dayName = inv.slot?.day !== undefined ? DAY_NAMES[inv.slot.day] : null;
-  const from = inv.slot?.from || "";
-  const to = inv.slot?.to || "";
-  const timeRange = from && to ? `${from}–${to}` : from ? from : "";
-  return {
-    _id: inv._id,
-    setting: inv.setting,
-    fromUser: inv.fromUser,
-    toUser: inv.toUser,
-    createdAt: inv.createdAt,
-    slot: inv.slot,
-    slotReadable: dayName ? `${dayName}${timeRange ? ` (${timeRange})` : ""}` : null,
-    opponentContact: buildSingleContact(inv.toUser),
-  };
-});
+    const invites = list.map((inv) => {
+      const dayName =
+        inv.slot?.day !== undefined ? DAY_NAMES[inv.slot.day] : null;
+
+      const from = inv.slot?.from || "";
+      const to = inv.slot?.to || "";
+      const timeRange = from && to ? `${from}–${to}` : from ? from : "";
+
+      return {
+        _id: inv._id,
+        status: inv.status,
+        setting: inv.setting,
+        message: inv.message || "",
+        fromUser: inv.fromUser,
+        toUser: inv.toUser,
+        createdAt: inv.createdAt,
+        slot: inv.slot,
+        slotReadable: dayName
+          ? `${dayName}${timeRange ? ` (${timeRange})` : ""}`
+          : null,
+        opponentContacts: buildContactLinks(inv.toUser || {}),
+        opponentContact: buildSingleContact(inv.toUser || {}),
+      };
+    });
 
     res.set("Cache-Control", "no-store");
     res.json({ invites });
   } catch (e) {
     console.error("outgoingInvites error:", e);
-    res.status(500).json({ message: "Failed to load outgoing" });
+    res.status(500).json({ message: "Failed to load outgoing", error: e?.message });
   }
 };
+
+
 
 exports.updateInviteStatus = async (req, res) => {
   try {
@@ -142,15 +180,20 @@ exports.acceptInvite = async (req, res) => {
       return res.status(403).json({ message: "Not your invite" });
     if (inv.status !== "pending")
       return res.status(400).json({ message: "Invite already resolved" });
-    inv.status = "accepted";
-    await inv.save();
+   inv.status = "accepted";
+   inv.closedByFrom = false;
+   inv.closedByTo = false;
+   inv.closedAtFrom = null;
+   inv.closedAtTo = null;
+   await inv.save();
     const links = buildContactLinks(inv.fromUser); 
     res.json({
-      message: "Accepted",
-      inviteId: inv._id,
-      opponent: { id: inv.fromUser._id, name: inv.fromUser.name },
-      chat: { links }, 
-    });
+  message: "Accepted",
+  inviteId: inv._id,
+  inviteStatus: inv.status,
+  opponent: { id: inv.fromUser._id, name: inv.fromUser.name },
+  chat: { links },
+});
   } catch (e) {
     console.error("acceptInvite error:", e);
     res.status(500).json({ message: "Failed to accept" });
@@ -179,4 +222,37 @@ exports.cancelInvite = async (req, res) => {
   inv.status = "canceled";
   await inv.save();
   res.json({ invite: inv });
+};
+
+exports.closeInvite = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const inv = await Invite.findById(id);
+    if (!inv) return res.status(404).json({ message: "Invite not found" });
+
+    const isFrom = String(inv.fromUser) === String(userId);
+    const isTo   = String(inv.toUser) === String(userId);
+    if (!isFrom && !isTo) return res.status(403).json({ message: "Not your invite" });
+
+    if (inv.status !== "accepted") {
+      return res.status(400).json({ message: "You can close only accepted invites" });
+    }
+
+    if (isFrom) {
+      inv.closedByFrom = true;
+      inv.closedAtFrom = new Date();
+    }
+    if (isTo) {
+      inv.closedByTo = true;
+      inv.closedAtTo = new Date();
+    }
+
+    await inv.save();
+    res.json({ invite: inv });
+  } catch (e) {
+    console.error("closeInvite error:", e);
+    res.status(500).json({ message: "Failed to close invite" });
+  }
 };

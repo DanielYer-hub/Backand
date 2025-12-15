@@ -18,17 +18,34 @@ exports.updateMyAvailability = async (req, res) => {
   res.json({ availability: u.availability });
 };
 
+
 exports.getPublicAvailability = async (req, res) => {
-  const { id } = req.params; 
+  const { id } = req.params;
+
   const u = await User.findById(id).select("availability");
   if (!u) return res.status(404).json({ message: "User not found" });
 
-  const base = u.availability || { busyAllWeek:false, days:[] };
-  if (base.busyAllWeek) return res.json({ availability: { busyAllWeek:true, days:[] } });
+  const base = u.availability || { busyAllWeek: false, days: [] };
+  if (base.busyAllWeek) {
+    return res.json({ availability: { busyAllWeek: true, days: [] } });
+  }
 
-  const holds = await Invite.find({ toUser:id, status: { $in:["pending","accepted"] } })
-                      .select("slot.day");
-  const blocked = new Set(holds.map(h => h.slot?.day).filter(d => d !== undefined));
+  const holds = await Invite.find({
+    $or: [
+      { toUser: id, status: "pending" },
+      { fromUser: id, status: "pending" },
+      { toUser: id, status: "accepted", closedByTo: { $ne: true } },
+      { fromUser: id, status: "accepted", closedByFrom: { $ne: true } },
+    ],
+  }).select("slot.day");
+
+  const blocked = new Set(
+    holds.map(h => h.slot?.day).filter(d => typeof d === "number")
+  );
+
   const days = (base.days || []).filter(d => !blocked.has(d.day));
-  res.json({ availability: { busyAllWeek:false, days } });
+
+  res.set("Cache-Control", "no-store");
+  res.json({ availability: { busyAllWeek: false, days } });
 };
+
