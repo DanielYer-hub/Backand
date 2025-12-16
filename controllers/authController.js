@@ -6,30 +6,34 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const register = async (req, res) => {
   try {
-    const { name, email, password, region, address, settings = [], contacts = {} } = req.body;
+    const { name, email, password, region, address, settings, contacts } = req.body;
+    if (!name?.first || !name?.last) {
+      return res.status(400).json({ message: "First and last name are required" });
+    }
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ message: "User already exists" });
     const normalizedContacts = {
-      phoneE164: contacts.phoneE164 || "",
-      telegramUsername: (contacts.telegramUsername || "").replace(/^@/, ""),
+      phoneE164: contacts?.phoneE164 || "",
+      telegramUsername: (contacts?.telegramUsername || "").replace(/^@/, ""),
     };
     if (!normalizedContacts.phoneE164 && !normalizedContacts.telegramUsername) {
       return res.status(400).json({ message: "Provide WhatsApp phone or Telegram username" });
     }
-
     const hash = generateUserPassword(password);
     const user = new User({
       name,
       email,
       password: hash,
-      region,
-      address: address || undefined,
-      settings,
+     region: region || undefined,
+      address: address || { country: "", city: "" },
+      settings: Array.isArray(settings) ? settings : [],
       contacts: normalizedContacts,
     });
     await user.save();
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
-
     res.status(201).json({
       message: "User created",
       token,
@@ -38,7 +42,7 @@ const register = async (req, res) => {
         name: user.name,
         email: user.email,
         region: user.region,
-        address: user.address, 
+        address: user.address,
         role: user.role,
         settings: user.settings,
         contacts: user.contacts,
@@ -48,6 +52,7 @@ const register = async (req, res) => {
     res.status(500).json({ message: "Registration error", error: err.message });
   }
 };
+
 
 const login = async (req, res) => {
   try {

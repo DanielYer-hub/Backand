@@ -1,6 +1,7 @@
 const Invite = require("../models/inviteModels");
 const User = require("../users/mongodb/Users");
 const { buildContactLinks, buildSingleContact } = require("../utils/contactLink");
+const { getMissingProfileFields, requireCompleteProfileOr } = require("../utils/profileGuard");
 
 const DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
@@ -9,6 +10,11 @@ exports.createInvite = async (req, res) => {
     const fromUser = req.user?.id;
     const { targetUserId, message, slot, setting } = req.body;
     if (!fromUser) return res.status(401).json({ message: "Not authenticated" });
+    
+    const me = await User.findById(fromUser).select("region address settings contacts").lean();
+    const missing = getMissingProfileFields(me);
+    if (requireCompleteProfileOr(res, missing)) return;
+
     if (!targetUserId) return res.status(400).json({ message: "targetUserId is required" });
     if (!slot || typeof slot.day !== "number" || slot.day < 0 || slot.day > 6) {
       return res.status(400).json({ message: "slot.day must be 0..6" });

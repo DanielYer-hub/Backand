@@ -11,5 +11,5 @@ module.exports = {
     "Asia",
     "Australia and Oceania" 
   ],
-  required: true           
+  required: false          
 };
