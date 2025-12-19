@@ -30,7 +30,8 @@ contacts: {
     telegramUsername: { type: String, default: "" }         
   },
 
-availability: { type: Availability, default: () => ({}) },
+availability: { type: Availability, default: () => ({ busyAllWeek: false, slots: [] }) },
+
 
 }, { timestamps: true });
 

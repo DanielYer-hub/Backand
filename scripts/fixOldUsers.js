@@ -17,7 +17,7 @@ async function fixOldUsers() {
           { availability: { $type: "string" } } 
         ]
       },
-      { $set: { availability: { busyAllWeek: false, days: [] } } }
+      { $set: { availability: { busyAllWeek: false, slots: [] } } }
     )
   );
   updates.push(
@@ -46,33 +46,34 @@ async function fixOldUsers() {
   );
   await Promise.all(updates);
   await User.updateMany(
-    { "availability.days": { $exists: true, $ne: null } },
-    [
-      {
-        $set: {
-          "availability.days": {
-            $map: {
-              input: "$availability.days",
-              as: "d",
-              in: {
-                day: { $toInt: "$$d.day" },
-                ranges: {
-                  $map: {
-                    input: { $ifNull: ["$$d.ranges", []] },
-                    as: "r",
-                    in: {
-                      from: { $ifNull: ["$$r.from", "18:00"] },
-                      to: { $ifNull: ["$$r.to", "22:00"] }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    ]
-  );
+  { "availability.slots": { $exists: true, $ne: null } },
+  [
+    {
+      $set: {
+        "availability.slots": {
+          $map: {
+            input: "$availability.slots",
+            as: "s",
+            in: {
+              date: { $ifNull: ["$$s.date", ""] },
+              ranges: {
+                $map: {
+                  input: { $ifNull: ["$$s.ranges", []] },
+                  as: "r",
+                  in: {
+                    from: { $ifNull: ["$$r.from", "18:00"] },
+                    to: { $ifNull: ["$$r.to", "22:00"] },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  ]
+);
+
 
   console.log("✅ All old users normalized!");
   await mongoose.disconnect();

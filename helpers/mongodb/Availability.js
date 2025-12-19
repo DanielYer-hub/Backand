@@ -9,9 +9,9 @@ const AvailabilityRange = new Schema(
   { _id: false }
 );
 
-const AvailabilityDay = new Schema(
+const AvailabilitySlot = new Schema(
   {
-    day:    { type: Number, min: 0, max: 6, required: true },
+    date:   { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/ },
     ranges: { type: [AvailabilityRange], default: [] },
   },
   { _id: false }
@@ -20,13 +20,13 @@ const AvailabilityDay = new Schema(
 const Availability = new Schema(
   {
     busyAllWeek: { type: Boolean, default: false },
-    days:        { type: [AvailabilityDay], default: [] },
+    slots:       { type: [AvailabilitySlot], default: [] },
   },
   { _id: false }
 );
 
 module.exports = {
   AvailabilityRange,
-  AvailabilityDay,
+  AvailabilitySlot,
   Availability,
 };
