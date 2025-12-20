@@ -34,15 +34,30 @@ const getAllUsers = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await User.findByIdAndDelete(id);
-    if (!deleted) {
-      return res.status(404).json({ message: "User not found" });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid user id" });
     }
+    const deleted = await User.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: "User not found" });
     res.json({ message: "User has been deleted" });
   } catch (err) {
     res.status(500).json({ message: "Delete error", error: err.message });
   }
 };
+
+const deleteMe = async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    const deleted = await User.findByIdAndDelete(userId);
+    if (!deleted) return res.status(404).json({ message: "User not found" });
+    return res.status(200).json({ message: "Account deleted" });
+  } catch (err) {
+    console.error("deleteMe error:", err);
+    return res.status(500).json({ message: "Delete error", error: err.message });
+  }
+};
+
 
 function pickPatch(allowed, body) {
   const out = {};
@@ -132,4 +147,4 @@ const uploadMyPhoto = async (req, res) => {
   }
 };
 
-module.exports = { getUserInfo, getAllUsers, deleteUser, updateMe, uploadMyPhoto };
+module.exports = { getUserInfo, getAllUsers, deleteUser, updateMe, uploadMyPhoto, deleteMe };
