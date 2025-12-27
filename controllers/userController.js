@@ -103,10 +103,15 @@ const updateMe = async (req, res) => {
       if (typeof patch.contacts.phoneE164 === "string") {
         let p = patch.contacts.phoneE164.trim();
         p = p.replace(/(?!^\+)\D/g, "");
-        if (!p.startsWith("+")) p = "+" + p.replace(/\D/g, "");
-        patch.contacts.phoneE164 = p;
-      }
+        const digits = p.replace(/\D/g, "");
+       if (!digits) {
+      patch.contacts.phoneE164 = "";
+    } else {
+      if (!p.startsWith("+")) p = "+" + digits;
+      patch.contacts.phoneE164 = p;
     }
+  }
+}
     const updated = await User.findByIdAndUpdate(
       req.user.id,
       patch,
