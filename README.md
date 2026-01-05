@@ -1,6 +1,6 @@
-# Generic Your Way – Backend
+# Forge Your Path – Backend
 
-מאגר זה מכיל את החלק **Backend** של הפרויקט **Generic Your Way**, שנבנה לצורך הדגמת יכולות Full-Stack.  
+מאגר זה מכיל את החלק **Backend** של הפרויקט **Forge Your Path**, שנבנה לצורך הדגמת יכולות Full-Stack.  
 הפרויקט מדמה קמפיין נרטיבי בעולם Warhammer 40,000: משתמשים נרשמים, בוחרים פלג (Faction), מקבלים כוכבי לכת, יכולים לזרוק אתגר (Challenge) לשחקנים אחרים, לאשר קרבות ולקבל נקודות.
 
 ---
