@@ -82,4 +82,39 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const requestPasswordReset = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User with this email not found" });
+    }
+    res.json({ message: "Email verified successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error verifying email", error: err.message });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: "Email and new password are required" });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const hash = generateUserPassword(newPassword);
+    user.password = hash;
+    await user.save();
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error resetting password", error: err.message });
+  }
+};
+
+module.exports = { register, login, requestPasswordReset, resetPassword };
