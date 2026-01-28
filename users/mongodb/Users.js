@@ -30,9 +30,11 @@ contacts: {
     telegramUsername: { type: String, default: "" }         
   },
 
-availability: { type: Availability, default: () => ({ busyAllWeek: false, slots: [] }) },
+  availability: { type: Availability, default: () => ({ busyAllWeek: false, slots: [] }) },
 
-
+  // Password reset via email code
+  resetCode: { type: String, default: null },
+  resetCodeExpiresAt: { type: Date, default: null },
 }, { timestamps: true });
 
 const User = mongoose.model("user", userSchema);

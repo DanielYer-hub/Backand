@@ -1,8 +1,10 @@
 const User = require("../users/mongodb/Users");
 const { generateUserPassword, comparePassword } = require("../users/helpers/bcrypt");
 const jwt = require("jsonwebtoken");
+const { sendPasswordResetCodeEmail } = require("../utils/mailer");
 require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET;
+const RESET_CODE_TTL_MINUTES = Number(process.env.RESET_CODE_TTL_MINUTES || 10);
 
 const register = async (req, res) => {
   try {
@@ -90,31 +92,77 @@ const requestPasswordReset = async (req, res) => {
     }
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "User with this email not found" });
+      // Чтобы не палить существование пользователя, можно вернуть тот же ответ
+      return res.status(200).json({ message: "If this email exists, a code has been sent" });
     }
-    res.json({ message: "Email verified successfully" });
+
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+
+    user.resetCode = code;
+    user.resetCodeExpiresAt = new Date(Date.now() + RESET_CODE_TTL_MINUTES * 60 * 1000);
+    await user.save();
+
+    await sendPasswordResetCodeEmail({ to: email, code });
+
+    res.json({ message: "Reset code sent" });
   } catch (err) {
-    res.status(500).json({ message: "Error verifying email", error: err.message });
+    res.status(500).json({ message: "Error sending reset code", error: err.message });
+  }
+};
+
+const verifyResetCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ message: "Email and code are required" });
+    }
+    const user = await User.findOne({ email });
+    if (!user || !user.resetCode || !user.resetCodeExpiresAt) {
+      return res.status(400).json({ message: "Invalid code" });
+    }
+
+    if (new Date(user.resetCodeExpiresAt).getTime() < Date.now()) {
+      return res.status(400).json({ message: "Code expired" });
+    }
+
+    if (String(user.resetCode) !== String(code)) {
+      return res.status(400).json({ message: "Invalid code" });
+    }
+
+    res.json({ message: "Code verified" });
+  } catch (err) {
+    res.status(500).json({ message: "Error verifying code", error: err.message });
   }
 };
 
 const resetPassword = async (req, res) => {
   try {
-    const { email, newPassword } = req.body;
-    if (!email || !newPassword) {
-      return res.status(400).json({ message: "Email and new password are required" });
+    const { email, code, newPassword } = req.body;
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ message: "Email, code and new password are required" });
     }
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (!user || !user.resetCode || !user.resetCodeExpiresAt) {
+      return res.status(400).json({ message: "Invalid code" });
     }
-    const hash = generateUserPassword(newPassword);
-    user.password = hash;
+
+    if (new Date(user.resetCodeExpiresAt).getTime() < Date.now()) {
+      return res.status(400).json({ message: "Code expired" });
+    }
+
+    if (String(user.resetCode) !== String(code)) {
+      return res.status(400).json({ message: "Invalid code" });
+    }
+
+    user.password = generateUserPassword(newPassword);
+    user.resetCode = null;
+    user.resetCodeExpiresAt = null;
     await user.save();
+
     res.json({ message: "Password updated successfully" });
   } catch (err) {
     res.status(500).json({ message: "Error resetting password", error: err.message });
   }
 };
 
-module.exports = { register, login, requestPasswordReset, resetPassword };
+module.exports = { register, login, requestPasswordReset, verifyResetCode, resetPassword };
