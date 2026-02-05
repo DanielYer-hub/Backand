@@ -29,6 +29,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/invites", inviteRoutes);
 app.use("/api/availability", require("./routes/availabilityRoutes"));
+app.use("/api/feedback", require("./routes/feedbackRoutes"));
+
 if (!CAMPAIGN_ENABLED){
 app.use("/api/battles", battleRoutes);
 app.use("/api/battlelog", battleLogRoutes);
