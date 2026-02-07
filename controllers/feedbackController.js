@@ -61,8 +61,9 @@ ${description}
 
     return res.json({ message: "Feedback sent" });
   } catch (err) {
-    console.error("sendFeedback error:", err);
-    return res.status(500).json({ message: "Failed to send feedback" });
+  console.error("sendFeedback error:", err?.message || err);
+  if (err?.response) console.error("smtp response:", err.response);
+  return res.status(500).json({ message: err?.message || "Failed to send feedback" });
   }
 };
 

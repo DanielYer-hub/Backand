@@ -32,7 +32,7 @@ contacts: {
 
   availability: { type: Availability, default: () => ({ busyAllWeek: false, slots: [] }) },
 
-  // Password reset via email code
+  
   resetCode: { type: String, default: null },
   resetCodeExpiresAt: { type: Date, default: null },
 }, { timestamps: true });
