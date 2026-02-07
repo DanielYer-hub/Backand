@@ -22,7 +22,7 @@ const sendFeedback = async (req, res) => {
       return res.status(400).json({ message: "Description is too long" });
     }
 
-    // если хочешь — можешь передавать эти поля с фронта
+  
     const fromEmail = clean(req.body?.fromEmail);
     const fromName = clean(req.body?.fromName);
 
@@ -48,7 +48,6 @@ ${description}
       to,
       subject,
       text,
-      // удобно: чтобы ты мог ответить человеку сразу
       replyTo: fromEmail || undefined,
     });
 
