@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+const { sendEmail } = require("../services/mailService");
 
 const ALLOWED_TYPES = new Set(["problem", "suggestion"]);
 
@@ -9,10 +9,8 @@ function clean(str = "") {
 const sendFeedback = async (req, res) => {
   try {
     const type = clean(req.body?.type).toLowerCase();
-    const description = clean(req.body?.description);
-
- 
     const title = clean(req.body?.title);
+    const description = clean(req.body?.description);
 
     if (!ALLOWED_TYPES.has(type)) {
       return res.status(400).json({ message: "Invalid feedback type" });
@@ -24,27 +22,14 @@ const sendFeedback = async (req, res) => {
       return res.status(400).json({ message: "Description is too long" });
     }
 
-    const fromEmail = clean(req.body?.fromEmail); 
+    // если хочешь — можешь передавать эти поля с фронта
+    const fromEmail = clean(req.body?.fromEmail);
     const fromName = clean(req.body?.fromName);
 
-console.log("SMTP_HOST:", process.env.SMTP_HOST);
-console.log("SMTP_PORT raw:", process.env.SMTP_PORT, "parsed:", Number(process.env.SMTP_PORT) || 587);
-
-const port = Number(process.env.SMTP_PORT) || 465;
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port,
-  secure: port === 465, // true для 465
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  // чтобы не висело 120 секунд
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
+    const to = process.env.FEEDBACK_TO_EMAIL;
+    if (!to) {
+      return res.status(500).json({ message: "FEEDBACK_TO_EMAIL is not configured" });
+    }
 
     const subjectPrefix = type === "problem" ? "BUG" : "SUGGESTION";
     const subject = `[Forge Your Path] ${subjectPrefix}${title ? `: ${title}` : ""}`;
@@ -59,19 +44,18 @@ Message:
 ${description}
 `;
 
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM,          // например "Forge Feedback <no-reply@...>"
-      to: process.env.FEEDBACK_TO_EMAIL,    // твой рабочий email
-      replyTo: fromEmail || undefined,      // удобно: отвечать сразу пользователю
+    await sendEmail({
+      to,
       subject,
       text,
+      // удобно: чтобы ты мог ответить человеку сразу
+      replyTo: fromEmail || undefined,
     });
 
     return res.json({ message: "Feedback sent" });
   } catch (err) {
-  console.error("sendFeedback error:", err?.message || err);
-  if (err?.response) console.error("smtp response:", err.response);
-  return res.status(500).json({ message: err?.message || "Failed to send feedback" });
+    console.error("sendFeedback error:", err);
+    return res.status(500).json({ message: "Failed to send feedback" });
   }
 };
 
