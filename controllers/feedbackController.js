@@ -27,18 +27,24 @@ const sendFeedback = async (req, res) => {
     const fromEmail = clean(req.body?.fromEmail); 
     const fromName = clean(req.body?.fromName);
 
-    console.log("SMTP_HOST:", process.env.SMTP_HOST);
+console.log("SMTP_HOST:", process.env.SMTP_HOST);
 console.log("SMTP_PORT raw:", process.env.SMTP_PORT, "parsed:", Number(process.env.SMTP_PORT) || 587);
 
-    const transporter = nodemailer.createTransport({
+const port = Number(process.env.SMTP_PORT) || 465;
+
+const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: (Number(process.env.SMTP_PORT) || 587) === 465,
+  port,
+  secure: port === 465, // true для 465
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-    });
+  // чтобы не висело 120 секунд
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
+});
 
     const subjectPrefix = type === "problem" ? "BUG" : "SUGGESTION";
     const subject = `[Forge Your Path] ${subjectPrefix}${title ? `: ${title}` : ""}`;
