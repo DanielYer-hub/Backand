@@ -24,18 +24,20 @@ const sendFeedback = async (req, res) => {
       return res.status(400).json({ message: "Description is too long" });
     }
 
-    // кто отправил (если есть auth middleware — лучше брать из req.user)
-    const fromEmail = clean(req.body?.fromEmail); // можно не передавать вообще
+    const fromEmail = clean(req.body?.fromEmail); 
     const fromName = clean(req.body?.fromName);
 
+    console.log("SMTP_HOST:", process.env.SMTP_HOST);
+console.log("SMTP_PORT raw:", process.env.SMTP_PORT, "parsed:", Number(process.env.SMTP_PORT) || 587);
+
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port,
-      secure: port === 465,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: (Number(process.env.SMTP_PORT) || 587) === 465,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
     });
 
     const subjectPrefix = type === "problem" ? "BUG" : "SUGGESTION";

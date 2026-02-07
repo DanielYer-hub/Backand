@@ -9,12 +9,15 @@ function hasSmtpEnv() {
     process.env.SMTP_FROM
   );
 }
-
+console.log("SMTP_HOST:", process.env.SMTP_HOST);
+console.log("SMTP_PORT raw:", process.env.SMTP_PORT, "parsed:", Number(process.env.SMTP_PORT) || 587);
 function createTransport() {
+  const port = Number(process.env.SMTP_PORT) || 587;
+
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: Number(process.env.SMTP_PORT) === 465,
+    port,
+    secure: port === 465,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
