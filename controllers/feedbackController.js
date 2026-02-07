@@ -11,7 +11,7 @@ const sendFeedback = async (req, res) => {
     const type = clean(req.body?.type).toLowerCase();
     const description = clean(req.body?.description);
 
-    // (опционально) если ты передаёшь title отдельно
+ 
     const title = clean(req.body?.title);
 
     if (!ALLOWED_TYPES.has(type)) {
@@ -30,8 +30,8 @@ const sendFeedback = async (req, res) => {
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT || 587),
-      secure: false, // true только если 465
+      port,
+      secure: port === 465,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
