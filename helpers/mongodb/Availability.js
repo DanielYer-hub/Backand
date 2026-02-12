@@ -5,6 +5,12 @@ const AvailabilityRange = new Schema(
   {
     from: { type: String, required: true, match: /^\d{2}:\d{2}$/ }, 
     to:   { type: String, required: true, match: /^\d{2}:\d{2}$/ }, 
+      place: {
+      type: String,
+      enum: ["tts","home","club"],
+      default: "club",
+      required: true,
+    },
   },
   { _id: false }
 );

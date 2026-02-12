@@ -9,7 +9,6 @@ function getResend() {
 }
 
 function getFrom() {
-  // временно можно onboarding@resend.dev
   return process.env.MAIL_FROM || "Forge Your Path <onboarding@resend.dev>";
 }
 

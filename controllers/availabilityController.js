@@ -1,6 +1,13 @@
 const User = require("../users/mongodb/Users");
 const Invite = require("../models/inviteModels");
 
+// const ALLOWED_PLACES = new Set(["tts","home","club"]);
+
+// function normalizePlace(p) {
+//   const x = String(p || "").trim().toLowerCase();
+//   return ALLOWED_PLACES.has(x) ? x : "club";
+// }
+
 function normalizeAvailability(av) {
   const busyAllWeek = !!av?.busyAllWeek;
   const slots =
@@ -13,6 +20,7 @@ function normalizeAvailability(av) {
       ranges: Array.isArray(s?.ranges) ? s.ranges.map(r => ({
         from: r?.from || "18:00",
         to: r?.to || "22:00",
+        place: ["tts", "home", "club"].includes(r?.place) ? r.place : "club",
       })) : [],
     })),
   };
@@ -34,7 +42,14 @@ exports.updateMyAvailability = async (req, res) => {
   }
   const nextSlots = (slots || []).map(s => ({
     date: s.date,
-    ranges: Array.isArray(s.ranges) ? s.ranges : []
+    // ranges: Array.isArray(s.ranges) ? s.ranges : []
+    ranges: Array.isArray(s.ranges)
+      ? s.ranges.map(r => ({
+          from: r?.from,
+          to: r?.to,
+          place: ["tts", "home", "club"].includes(r?.place) ? r.place : "club",
+        }))
+      : []
   }));
 
   const u = await User.findByIdAndUpdate(

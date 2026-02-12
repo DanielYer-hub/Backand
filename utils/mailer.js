@@ -9,8 +9,7 @@ function hasSmtpEnv() {
     process.env.SMTP_FROM
   );
 }
-console.log("SMTP_HOST:", process.env.SMTP_HOST);
-console.log("SMTP_PORT raw:", process.env.SMTP_PORT, "parsed:", Number(process.env.SMTP_PORT) || 587);
+
 function createTransport() {
   const port = Number(process.env.SMTP_PORT) || 587;
 
