@@ -1,12 +1,6 @@
 const User = require("../users/mongodb/Users");
 const Invite = require("../models/inviteModels");
 
-// const ALLOWED_PLACES = new Set(["tts","home","club"]);
-
-// function normalizePlace(p) {
-//   const x = String(p || "").trim().toLowerCase();
-//   return ALLOWED_PLACES.has(x) ? x : "club";
-// }
 
 function normalizeAvailability(av) {
   const busyAllWeek = !!av?.busyAllWeek;
@@ -42,7 +36,6 @@ exports.updateMyAvailability = async (req, res) => {
   }
   const nextSlots = (slots || []).map(s => ({
     date: s.date,
-    // ranges: Array.isArray(s.ranges) ? s.ranges : []
     ranges: Array.isArray(s.ranges)
       ? s.ranges.map(r => ({
           from: r?.from,
