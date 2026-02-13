@@ -10,8 +10,8 @@ const normPlace = (p) => {
 
 router.get("/players", async (req, res) => {
   try {
-    const { setting, country, city, date, from, place } = req.query;
-    // const place = normPlace(req.query.place);
+    const { setting, country, city, date, from } = req.query;
+    const place = normPlace(req.query.place);
     const criteria = {};
 
     if (setting) criteria.settings = setting;
@@ -20,41 +20,41 @@ router.get("/players", async (req, res) => {
 
     criteria["availability.busyAllWeek"] = { $ne: true };
 
-    if (date || from || place) {
-  const rangesMatch = {};
-  if (from) rangesMatch.from = { $lte: String(from) };
-  if (place) rangesMatch.place = String(place);
+//   if (date || from || place) {
+//   const rangesMatch = {};
+//   if (from) rangesMatch.from = { $lte: String(from) };
+//   if (place) rangesMatch.place = String(place);
 
-  const slotMatch = {};
-  if (date) slotMatch.date = String(date);
-  if (Object.keys(rangesMatch).length) {
-    slotMatch.ranges = { $elemMatch: rangesMatch };
-  }
+//   const slotMatch = {};
+//   if (date) slotMatch.date = String(date);
+//   if (Object.keys(rangesMatch).length) {
+//     slotMatch.ranges = { $elemMatch: rangesMatch };
+//   }
 
-  criteria["availability.slots"] = { $elemMatch: slotMatch };
-}
+//   criteria["availability.slots"] = { $elemMatch: slotMatch };
+// }
 
-    // const slotElem = {};
-    // if (date) {
-    //   slotElem.date = String(date);
-    // }
-    // const rangeElem = {};
-    // if (from) {
-    //   rangeElem.from = { $lte: String(from) };
-    // }
-    // if (place) {
-    //   rangeElem.place = place;
-    // }
-    // if (Object.keys(rangeElem).length) {
-    //   slotElem.ranges = { $elemMatch: rangeElem };
-    // }
-    // if (Object.keys(slotElem).length) {
-    //   criteria["availability.slots"] = { $elemMatch: slotElem };
-    // } else if (place) {
-    //   criteria["availability.slots"] = {
-    //     $elemMatch: { ranges: { $elemMatch: { place } } },
-    //   };
-    // }
+    const slotElem = {};
+    if (date) {
+      slotElem.date = String(date);
+    }
+    const rangeElem = {};
+    if (from) {
+      rangeElem.from = { $lte: String(from) };
+    }
+    if (place) {
+      rangeElem.place = place;
+    }
+    if (Object.keys(rangeElem).length) {
+      slotElem.ranges = { $elemMatch: rangeElem };
+    }
+    if (Object.keys(slotElem).length) {
+      criteria["availability.slots"] = { $elemMatch: slotElem };
+    } else if (place) {
+      criteria["availability.slots"] = {
+        $elemMatch: { ranges: { $elemMatch: { place } } },
+      };
+    }
 
 // if (date) {
 //   if (from) {
