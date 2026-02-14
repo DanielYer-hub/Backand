@@ -11,6 +11,8 @@ const battleLogRoutes = require("./routes/battleLogRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 const inviteRoutes = require("./routes/inviteRoutes");
 const morgan = require('morgan');
+
+
 require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT;
@@ -30,6 +32,8 @@ app.use("/api/public", publicRoutes);
 app.use("/api/invites", inviteRoutes);
 app.use("/api/availability", require("./routes/availabilityRoutes"));
 app.use("/api/feedback", require("./routes/feedbackRoutes"));
+app.use("/api/favorites", require("./routes/favoriteRoutes"));
+
 
 if (!CAMPAIGN_ENABLED){
 app.use("/api/battles", battleRoutes);

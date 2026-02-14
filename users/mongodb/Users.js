@@ -32,6 +32,8 @@ contacts: {
 
   availability: { type: Availability, default: () => ({ busyAllWeek: false, slots: [] }) },
 
+  favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "user", default: [] }], // Array of ObjectIds referencing other users
+
   
   resetCode: { type: String, default: null },
   resetCodeExpiresAt: { type: Date, default: null },
