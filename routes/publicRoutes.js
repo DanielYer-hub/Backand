@@ -52,7 +52,7 @@ router.get("/players", async (req, res) => {
   }
 });
 
-// New route to get favorite players with the same filters
+
 router.get("/players/favorites", auth, async (req, res) => {
   try {
     const { setting, country, city, date, from, place } = req.query;

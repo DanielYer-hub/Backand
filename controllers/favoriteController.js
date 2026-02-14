@@ -4,6 +4,7 @@ const User = require("../users/mongodb/Users");
 exports.getMyFavorites = async (req, res) => {
   const me = await User.findById(req.user.id).select("favorites").lean();
   if (!me) return res.status(404).json({ message: "User not found" });
+  res.set("Cache-Control", "no-store");
   res.json({ favorites: (me.favorites || []).map(String) });
 };
 
