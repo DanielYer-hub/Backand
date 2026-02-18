@@ -92,7 +92,7 @@ const requestPasswordReset = async (req, res) => {
     }
     const user = await User.findOne({ email });
     if (!user) {
-      // Чтобы не палить существование пользователя, можно вернуть тот же ответ
+     
       return res.status(200).json({ message: "If this email exists, a code has been sent" });
     }
 
