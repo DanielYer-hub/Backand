@@ -1,84 +1,84 @@
-const { generateAuthToken } = require("../../auth/providers/jwt");
-const { createError } = require("../../utils/handleErrors");
-const { generateUserPassword, comparePassword } = require("../helpers/bcrypt");
-const User = require("./mongodb/User");
+// const { generateAuthToken } = require("../../auth/providers/jwt");
+// const { createError } = require("../../utils/handleErrors");
+// const { generateUserPassword, comparePassword } = require("../helpers/bcrypt");
+// const User = require("./mongodb/User");
 
 
-const registerUser = async (newUser) => {
-  try {
-    newUser.password = generateUserPassword(newUser.password);
-    let user = new User(newUser);
-    user = await user.save();
-    return user;
-  } catch (error) {
-    return createError("Mongoos", error.message);
-  }
-};
+// const registerUser = async (newUser) => {
+//   try {
+//     newUser.password = generateUserPassword(newUser.password);
+//     let user = new User(newUser);
+//     user = await user.save();
+//     return user;
+//   } catch (error) {
+//     return createError("Mongoos", error.message);
+//   }
+// };
 
 
-const getUser = async (userId) => {
-  try {
-    const user = await User.findById(userId);
-    return user;
-  } catch (error) {
-    return createError("Mongoos", error.message);
-  }
-};
+// const getUser = async (userId) => {
+//   try {
+//     const user = await User.findById(userId);
+//     return user;
+//   } catch (error) {
+//     return createError("Mongoos", error.message);
+//   }
+// };
 
 
-const getAllUsers = async () => {
-  try {
-    const users = await User.find();
-    return users;
-  } catch (error) {
-    return createError("Mongoos", error.message);
-  }
-};
+// const getAllUsers = async () => {
+//   try {
+//     const users = await User.find();
+//     return users;
+//   } catch (error) {
+//     return createError("Mongoos", error.message);
+//   }
+// };
 
 
-const loginUser = async (email, password) => {
-  try {
-    const userFromDB = await User.findOne({ email });
-    if (!userFromDB) {
-      return createError("Authentication", "User not exist");
-    }
+// const loginUser = async (email, password) => {
+//   try {
+//     const userFromDB = await User.findOne({ email });
+//     if (!userFromDB) {
+//       return createError("Authentication", "User not exist");
+//     }
 
-    if (!comparePassword(password, userFromDB.password)) {
-      return createError("Authentication", "Invalid email or password");
-    }
+//     if (!comparePassword(password, userFromDB.password)) {
+//       return createError("Authentication", "Invalid email or password");
+//     }
 
-    const token = generateAuthToken(userFromDB);
-    return token;
-  } catch (error) {
-    return createError("Authentication", error.message);
-  }
-};
+//     const token = generateAuthToken(userFromDB);
+//     return token;
+//   } catch (error) {
+//     return createError("Authentication", error.message);
+//   }
+// };
 
-const updateUser = async (id, updatedUser) => {
-  try {
-    const userFromDB = await User.findById(id);
+// const updateUser = async (id, updatedUser) => {
+//   try {
+//     const userFromDB = await User.findById(id);
 
-    if (!userFromDB) {
-      return createError("Authentication", "User not exist", 400);
-    }
-    let user = await User.findByIdAndUpdate(id, updatedUser);
-    user = await user.save();
-    return user;
-  } catch (error) {
-    return createError("Mongoos", error.message);
-  }
-};
+//     if (!userFromDB) {
+//       return createError("Authentication", "User not exist", 400);
+//     }
+//     let user = await User.findByIdAndUpdate(id, updatedUser);
+//     user = await user.save();
+//     return user;
+//   } catch (error) {
+//     return createError("Mongoos", error.message);
+//   }
+// };
 
 
-const deleteUser = async (id) => {
-  let user = await User.findById(id);
+// const deleteUser = async (id) => {
+//   let user = await User.findById(id);
 
-  if (!user) {
-    return createError("Authentication", "User not exist", 400);
-  }
+//   if (!user) {
+//     return createError("Authentication", "User not exist", 400);
+//   }
 
-  user = await User.findByIdAndDelete(id);
-  return user;
-};
+//   user = await User.findByIdAndDelete(id);
+//   return user;
+// };
 
-module.exports = { registerUser, getUser, getAllUsers, loginUser, deleteUser, updateUser };
+// module.exports = { registerUser, getUser, getAllUsers, loginUser, deleteUser, updateUser };

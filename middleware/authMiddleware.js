@@ -9,7 +9,6 @@ const authMiddleware = (req, res, next) => {
     return res.status(401).json({ message: "Please login." });
   }
 
-  // const token = authHeader.replace("Bearer ", "");
   const token = authHeader.slice("Bearer ".length).trim();
   
   try {
