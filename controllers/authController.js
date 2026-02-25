@@ -1,7 +1,8 @@
 const User = require("../users/mongodb/Users");
 const { generateUserPassword, comparePassword } = require("../users/helpers/bcrypt");
 const jwt = require("jsonwebtoken");
-const { sendPasswordResetCodeEmail } = require("../utils/mailer");
+const { sendPasswordResetCodeEmail } = require("../services/email/emailService");
+
 require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const RESET_CODE_TTL_MINUTES = Number(process.env.RESET_CODE_TTL_MINUTES || 10);
@@ -92,7 +93,6 @@ const requestPasswordReset = async (req, res) => {
     }
     const user = await User.findOne({ email });
     if (!user) {
-     
       return res.status(200).json({ message: "If this email exists, a code has been sent" });
     }
 
@@ -102,7 +102,11 @@ const requestPasswordReset = async (req, res) => {
     user.resetCodeExpiresAt = new Date(Date.now() + RESET_CODE_TTL_MINUTES * 60 * 1000);
     await user.save();
 
-    await sendPasswordResetCodeEmail({ to: email, code });
+    await sendPasswordResetCodeEmail({
+    to: email,
+    code,
+    ttlMinutes: RESET_CODE_TTL_MINUTES,
+    });
 
     res.json({ message: "Reset code sent" });
   } catch (err) {
