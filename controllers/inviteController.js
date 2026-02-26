@@ -81,8 +81,10 @@ exports.incomingInvites = async (req, res) => {
       createdAt: inv.createdAt,
       slot: inv.slot,
       slotReadable: slotToReadable(inv.slot), 
-      opponentContacts: buildContactLinks(inv.fromUser || {}),
-      opponentContact: buildSingleContact(inv.fromUser || {}),
+      closedByFrom: inv.closedByFrom,
+      closedByTo: inv.closedByTo,
+      closedAtFrom: inv.closedAtFrom,
+      closedAtTo: inv.closedAtTo,
     }));
 
     res.set("Cache-Control", "no-store");
@@ -113,9 +115,11 @@ exports.outgoingInvites = async (req, res) => {
       toUser: inv.toUser,
       createdAt: inv.createdAt,
       slot: inv.slot,
-      slotReadable: slotToReadable(inv.slot), 
-      opponentContacts: buildContactLinks(inv.toUser || {}),
-      opponentContact: buildSingleContact(inv.toUser || {}),
+      slotReadable: slotToReadable(inv.slot),
+      closedByFrom: inv.closedByFrom,
+      closedByTo: inv.closedByTo,
+      closedAtFrom: inv.closedAtFrom,
+      closedAtTo: inv.closedAtTo,
     }));
 
     res.set("Cache-Control", "no-store");

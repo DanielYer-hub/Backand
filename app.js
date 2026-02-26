@@ -10,6 +10,7 @@ const battleRoutes = require("./routes/battleRoutes");
 const battleLogRoutes = require("./routes/battleLogRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 const inviteRoutes = require("./routes/inviteRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 const morgan = require('morgan');
 
 
@@ -30,6 +31,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/invites", inviteRoutes);
+app.use("/api/chat", chatRoutes);
 app.use("/api/availability", require("./routes/availabilityRoutes"));
 app.use("/api/feedback", require("./routes/feedbackRoutes"));
 app.use("/api/favorites", require("./routes/favoriteRoutes"));
