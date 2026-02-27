@@ -52,7 +52,7 @@ exports.listMessages = async (req, res) => {
 
     const messages = await ChatMessage.find({ invite: inviteId })
       .sort({ createdAt: 1 })
-      .select("fromUser toUser text createdAt")
+      .select("fromUser toUser text createdAt readAt") // include readAt in the response
       .lean();
 
     res.json({
@@ -63,6 +63,7 @@ exports.listMessages = async (req, res) => {
         toUser: m.toUser,
         text: m.text,
         createdAt: m.createdAt,
+        readAt: m.readAt || null, // null if not read yet
       })),
     });
   } catch (e) {
@@ -126,5 +127,87 @@ exports.sendMessage = async (req, res) => {
   } catch (e) {
     console.error("sendMessage error:", e);
     res.status(500).json({ message: "Failed to send message", error: e?.message });
+  }
+};
+
+// New endpoint to mark messages as read
+exports.markRead = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { inviteId } = req.params;
+
+    const invite = await Invite.findById(inviteId);
+    if (!invite) return res.status(404).json({ message: "Invite not found" });
+
+    const isFrom = String(invite.fromUser) === String(userId);
+    const isTo = String(invite.toUser) === String(userId);
+    if (!isFrom && !isTo) return res.status(403).json({ message: "Not your invite" });
+
+    if (invite.status !== "accepted") {
+      return res.status(400).json({ message: "Chat available only for accepted invites" });
+    }
+
+    // ✅ mark all messages sent TO me as read
+    const result = await ChatMessage.updateMany(
+      { invite: inviteId, toUser: userId, readAt: null },
+      { $set: { readAt: new Date() } }
+    );
+
+    res.json({ updated: result.modifiedCount || result.nModified || 0 });
+  } catch (e) {
+    console.error("markRead error:", e);
+    res.status(500).json({ message: "Failed to mark read", error: e?.message });
+  }
+};
+
+// New endpoint to mark messages as read
+exports.unreadCount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { inviteId } = req.params;
+
+    const invite = await Invite.findById(inviteId);
+    if (!invite) return res.status(404).json({ message: "Invite not found" });
+
+    const isFrom = String(invite.fromUser) === String(userId);
+    const isTo = String(invite.toUser) === String(userId);
+    if (!isFrom && !isTo) return res.status(403).json({ message: "Not your invite" });
+
+    if (invite.status !== "accepted") return res.json({ unread: 0 });
+
+    const unread = await ChatMessage.countDocuments({
+      invite: inviteId,
+      toUser: userId,
+      readAt: null,
+    });
+
+    res.json({ unread });
+  } catch (e) {
+    console.error("unreadCount error:", e);
+    res.status(500).json({ message: "Failed to get unread count", error: e?.message });
+  }
+};
+
+// New endpoint to get unread counts for all invites of the user
+exports.unreadByInvite = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const agg = await ChatMessage.aggregate([
+      { $match: { toUser: new mongoose.Types.ObjectId(userId), readAt: null } },
+      { $group: { _id: "$invite", count: { $sum: 1 } } },
+    ]);
+
+    const byInvite = {};
+    let total = 0;
+    for (const row of agg) {
+      byInvite[String(row._id)] = row.count;
+      total += row.count;
+    }
+
+    res.json({ byInvite, total });
+  } catch (e) {
+    console.error("unreadByInvite error:", e);
+    res.status(500).json({ message: "Failed to load unread map", error: e?.message });
   }
 };

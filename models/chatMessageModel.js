@@ -7,6 +7,7 @@ const chatMessageSchema = new Schema(
     fromUser: { type: Schema.Types.ObjectId, ref: "user", required: true },
     toUser: { type: Schema.Types.ObjectId, ref: "user", required: true },
     text: { type: String, required: true, trim: true, maxlength: 2000 },
+    readAt: { type: Date, default: null } // null if not read yet
   },
   { timestamps: true }
 );

@@ -1,4 +1,5 @@
 const Invite = require("../models/inviteModels");
+const ChatMessage = require("../models/chatMessageModel");
 const User = require("../users/mongodb/Users");
 const { buildContactLinks, buildSingleContact } = require("../utils/contactLink");
 const { getMissingProfileFields, requireCompleteProfileOr } = require("../utils/profileGuard");
@@ -178,6 +179,11 @@ exports.acceptInvite = async (req, res) => {
     inv.closedAtFrom = null;
     inv.closedAtTo = null;
     await inv.save();
+    // If both sides had previously closed the invite, we consider it a "new" chat and clear old messages
+    const bothClosed = inv.closedByFrom && inv.closedByTo;
+    if (bothClosed) {
+    await ChatMessage.deleteMany({ invite: inv._id }); 
+    }// ✅ delete chat history
 
     const links = buildContactLinks(inv.fromUser);
     res.json({
@@ -251,5 +257,32 @@ exports.closeInvite = async (req, res) => {
   } catch (e) {
     console.error("closeInvite error:", e);
     res.status(500).json({ message: "Failed to close invite", error: e?.message });
+  }
+};
+
+// New endpoint to count pending incoming invites
+exports.incomingCount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const pending = await Invite.countDocuments({ toUser: userId, status: "pending" });
+    res.json({ pending });
+  } catch (e) {
+    res.status(500).json({ message: "Failed to count incoming invites", error: e?.message });
+  }
+};
+
+exports.incomingInvitesCount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const pending = await Invite.countDocuments({
+      toUser: userId,
+      status: "pending",
+    });
+
+    res.set("Cache-Control", "no-store");
+    res.json({ pending });
+  } catch (e) {
+    console.error("incomingInvitesCount error:", e);
+    res.status(500).json({ message: "Failed to load count", error: e?.message });
   }
 };
