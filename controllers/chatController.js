@@ -1,5 +1,6 @@
 const Invite = require("../models/inviteModels");
 const ChatMessage = require("../models/chatMessageModel");
+const mongoose = require("mongoose");
 
 function mapInviteForUser(invite, userId) {
   const isFrom = String(invite.fromUser._id || invite.fromUser) === String(userId);
