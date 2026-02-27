@@ -37,7 +37,6 @@ contacts: {
   default: [],
 },
 
-  
   resetCode: { type: String, default: null },
   resetCodeExpiresAt: { type: Date, default: null },
 }, { timestamps: true });

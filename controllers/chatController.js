@@ -144,20 +144,15 @@ exports.markRead = async (req, res) => {
     const isTo = String(invite.toUser) === String(userId);
     if (!isFrom && !isTo) return res.status(403).json({ message: "Not your invite" });
 
-    if (invite.status !== "accepted") {
-      return res.status(400).json({ message: "Chat available only for accepted invites" });
-    }
-
-    // ✅ mark all messages sent TO me as read
     const result = await ChatMessage.updateMany(
       { invite: inviteId, toUser: userId, readAt: null },
       { $set: { readAt: new Date() } }
     );
 
-    res.json({ updated: result.modifiedCount || result.nModified || 0 });
+    res.json({ updated: result.modifiedCount || 0 });
   } catch (e) {
     console.error("markRead error:", e);
-    res.status(500).json({ message: "Failed to mark read", error: e?.message });
+    res.status(500).json({ message: "Failed to mark read" });
   }
 };
 
